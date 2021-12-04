@@ -34,7 +34,7 @@ struct Bucket
 
 struct HashMap
 {
-    struct Bucket *buckettable; // pointer to bucket array
+    struct Bucket *bucket_table; // pointer to bucket array
 
     // no globals because we modify them when resizing
     // imp to have a copy of buck n slot no when the hashmap was init-ed
@@ -53,8 +53,8 @@ int hashmap_get(struct HashMap *hashmap, char *k, int *v);
 int hashmap_resize(struct HashMap *hashmap);
 int hashmap_add(struct HashMap *hashmap, char *k, int v);
 int hashmap_del(struct HashMap *hashmap, char *k);
-int check_full(struct HashMap *hashmap, int bucketindex);
-int check_something(struct HashMap *hashmap, int bucketindex);
+int check_full(struct HashMap *hashmap, int bucket_index);
+int check_something(struct HashMap *hashmap, int bucket_index);
 
 int hasmap_init(struct HashMap *hashmap)
 {
@@ -62,14 +62,14 @@ int hasmap_init(struct HashMap *hashmap)
     hashmap->m_slots = no_slots;
     hashmap->index_keyval = 0;
 
-    hashmap->buckettable = (struct Bucket *)malloc(sizeof(struct Bucket) * hashmap->m_buckets);
+    hashmap->bucket_table = (struct Bucket *)malloc(sizeof(struct Bucket) * hashmap->m_buckets);
 
-    // initializing the buckettable
+    // initializing the bucket_table
     for (int i = 0; i < hashmap->m_buckets; ++i)
     {
         for (int j = 0; j < hashmap->m_slots; ++j)
         {
-            hashmap->buckettable[i].hash[j] = 0;
+            hashmap->bucket_table[i].hash[j] = 0;
         }
     }
 
@@ -77,7 +77,7 @@ int hasmap_init(struct HashMap *hashmap)
     {
         for (int j = 0; j < hashmap->m_slots; ++j)
         {
-            hashmap->buckettable[i].index[j] = -1;
+            hashmap->bucket_table[i].index[j] = -1;
         }
     }
 
@@ -111,8 +111,8 @@ int hashmap_deinit(struct HashMap *hashmap)
         free(hashmap->keys[i]);
     }
 
-    free(hashmap->buckettable);
-    hashmap->buckettable = NULL;
+    free(hashmap->bucket_table);
+    hashmap->bucket_table = NULL;
 
     free(hashmap->keys);
     hashmap->keys = NULL;
@@ -132,22 +132,22 @@ int hashmap_add(struct HashMap *hashmap, char *k, int v)
     uint32_t hash = adler32((const void *)k, size);
 
     int pos = hash & (hashmap->m_buckets * hashmap->m_slots - 1);
-    int bucketindex = pos >> 3;
-    int slotindex = pos & (hashmap->m_slots - 1);
+    int bucket_index = pos >> 3;
+    int slot_index = pos & (hashmap->m_slots - 1);
 
     // check if the key has been already used in a entry
-    int t = slotindex;
+    int t = slot_index;
     while (1)
     {
-        if (hashmap->buckettable[bucketindex].hash[slotindex] != hash)
+        if (hashmap->bucket_table[bucket_index].hash[slot_index] != hash)
         {
-            slotindex++;
-            if (slotindex == hashmap->m_slots)
+            slot_index++;
+            if (slot_index == hashmap->m_slots)
             {
-                slotindex = 0;
+                slot_index = 0;
             }
 
-            if (slotindex == t)
+            if (slot_index == t)
             {
                 break;
             }
@@ -156,7 +156,7 @@ int hashmap_add(struct HashMap *hashmap, char *k, int v)
         }
         else
         {
-            if (memcmp(hashmap->keys[hashmap->buckettable[bucketindex].index[slotindex]], k, hashmap->sizes_of_keys[hashmap->buckettable[bucketindex].index[slotindex]]) == 0)
+            if (memcmp(hashmap->keys[hashmap->bucket_table[bucket_index].index[slot_index]], k, hashmap->sizes_of_keys[hashmap->bucket_table[bucket_index].index[slot_index]]) == 0)
             {
                 printf("Something Something Already Added. %d @ %s", __LINE__, __FILE__);
                 return -1;
@@ -164,10 +164,10 @@ int hashmap_add(struct HashMap *hashmap, char *k, int v)
         }
     }
 
-    slotindex = t;
+    slot_index = t;
 
     // check if there is room in the bucket
-    if (check_full(hashmap, bucketindex))
+    if (check_full(hashmap, bucket_index))
     {
         // run code to resize hashmap
         hashmap_resize(hashmap);
@@ -176,12 +176,12 @@ int hashmap_add(struct HashMap *hashmap, char *k, int v)
     // since there is a free slot find one
     while (1)
     {
-        if (hashmap->buckettable[bucketindex].hash[slotindex] != 0)
+        if (hashmap->bucket_table[bucket_index].hash[slot_index] != 0)
         {
-            slotindex++;
-            if (slotindex == hashmap->m_slots)
+            slot_index++;
+            if (slot_index == hashmap->m_slots)
             {
-                slotindex = 0;
+                slot_index = 0;
             }
 
             continue;
@@ -190,9 +190,9 @@ int hashmap_add(struct HashMap *hashmap, char *k, int v)
         break;
     }
 
-    // now that we have a bucketindex and slotindex, use them to fill in the buckettable
-    hashmap->buckettable[bucketindex].hash[slotindex] = hash;
-    hashmap->buckettable[bucketindex].index[slotindex] = hashmap->index_keyval;
+    // now that we have a bucket_index and slot_index, use them to fill in the bucket_table
+    hashmap->bucket_table[bucket_index].hash[slot_index] = hash;
+    hashmap->bucket_table[bucket_index].index[slot_index] = hashmap->index_keyval;
 
     hashmap->keys[hashmap->index_keyval] = (char *)malloc(sizeof(int) * size);
     memcpy(hashmap->keys[hashmap->index_keyval], k, size * sizeof(int));
@@ -211,34 +211,34 @@ int hashmap_del(struct HashMap *hashmap, char *k)
     uint32_t hash = adler32((const void *)k, size);
 
     int pos = hash & (hashmap->m_buckets * hashmap->m_slots - 1);
-    int bucketindex = pos >> 3;
-    int slotindex = pos & (hashmap->m_slots - 1);
+    int bucket_index = pos >> 3;
+    int slot_index = pos & (hashmap->m_slots - 1);
 
     // check if there is atleast one thing in the bucket
-    if (!check_something(hashmap, bucketindex))
+    if (!check_something(hashmap, bucket_index))
     {
         return -1; // nothing is in the bucket
     }
 
     // if there is the required thing in the slot find it
-    int tmp = slotindex;
+    int tmp = slot_index;
     while (1)
     {
-        if (hashmap->buckettable[bucketindex].hash[slotindex] == hash)
+        if (hashmap->bucket_table[bucket_index].hash[slot_index] == hash)
         { // hashes may match but our hash function isn't sha256, multiple inputs can have the same hash, sha256 is believed to be immune to this (and many others may be aswell) but its kinda hard to implement
-            if (memcmp(hashmap->keys[hashmap->buckettable[bucketindex].index[slotindex]], k, size) == 0)
+            if (memcmp(hashmap->keys[hashmap->bucket_table[bucket_index].index[slot_index]], k, size) == 0)
             {
                 break;
             }
         }
 
-        slotindex++;
-        if (slotindex == no_slots)
+        slot_index++;
+        if (slot_index == no_slots)
         {
-            slotindex = 0;
+            slot_index = 0;
         }
 
-        if (slotindex == tmp)
+        if (slot_index == tmp)
         {
             // nothing to delete, we checked all slot indexes
             return -1;
@@ -247,13 +247,13 @@ int hashmap_del(struct HashMap *hashmap, char *k)
     // now we have slot index to delete
 
     // go on a delete spree
-    free(hashmap->keys[hashmap->buckettable[bucketindex].index[slotindex]]);
+    free(hashmap->keys[hashmap->bucket_table[bucket_index].index[slot_index]]);
 
-    hashmap->keys[hashmap->buckettable[bucketindex].index[slotindex]] = NULL;
-    hashmap->values[hashmap->buckettable[bucketindex].index[slotindex]] = 0;
+    hashmap->keys[hashmap->bucket_table[bucket_index].index[slot_index]] = NULL;
+    hashmap->values[hashmap->bucket_table[bucket_index].index[slot_index]] = 0;
 
-    hashmap->buckettable[bucketindex].index[slotindex] = -1;
-    hashmap->buckettable[bucketindex].hash[slotindex] = 0;
+    hashmap->bucket_table[bucket_index].index[slot_index] = -1;
+    hashmap->bucket_table[bucket_index].hash[slot_index] = 0;
 
     return 0;
 }
@@ -275,7 +275,7 @@ int hashmap_resize(struct HashMap *hashmap)
     }
 
     hashmap_deinit(hashmap);
-    hashmap->buckettable = hTemp.buckettable;
+    hashmap->bucket_table = hTemp.bucket_table;
     hashmap->index_keyval = hTemp.index_keyval;
     hashmap->keys = hTemp.keys;
     hashmap->m_buckets = hTemp.m_buckets;
@@ -292,37 +292,37 @@ int hashmap_get(struct HashMap *hashmap, char *k, int *v)
     uint32_t hash = adler32((const void *)k, size);
 
     int pos = hash & (hashmap->m_buckets * hashmap->m_slots - 1);
-    int bucketindex = pos / hashmap->m_slots;
-    int slotindex = pos & (hashmap->m_slots - 1);
+    int bucket_index = pos / hashmap->m_slots;
+    int slot_index = pos & (hashmap->m_slots - 1);
 
     // check if atleast Something is in bucket
-    if (!check_something(hashmap, bucketindex))
+    if (!check_something(hashmap, bucket_index))
     {
         memset(v, 0, sizeof(int));
         return -1;
     }
 
     // since something exist start looking if its a match
-    int tmp = slotindex;
+    int tmp = slot_index;
     while (1)
     {
-        if (hashmap->buckettable[bucketindex].hash[slotindex] == hash)
+        if (hashmap->bucket_table[bucket_index].hash[slot_index] == hash)
         {
             // hashes may match but our hash function isn't sha256, multiple inputs can have the same hash, sha256 is believed to be immune to this (and many others may be aswell) but its kinda hard to implement
             // so also check the actual keys
-            if (memcmp(hashmap->keys[hashmap->buckettable[bucketindex].index[slotindex]], k, size) == 0)
+            if (memcmp(hashmap->keys[hashmap->bucket_table[bucket_index].index[slot_index]], k, size) == 0)
             {
                 break;
             }
         }
 
-        slotindex++;
-        if (slotindex == no_slots)
+        slot_index++;
+        if (slot_index == no_slots)
         {
-            slotindex = 0;
+            slot_index = 0;
         }
 
-        if (slotindex == tmp)
+        if (slot_index == tmp)
         {
             // key does not exists, we checked all slot indexes
             return -1;
@@ -330,19 +330,19 @@ int hashmap_get(struct HashMap *hashmap, char *k, int *v)
     }
     // now we have slot index to get
 
-    *v = hashmap->values[hashmap->buckettable[bucketindex].index[slotindex]];
+    *v = hashmap->values[hashmap->bucket_table[bucket_index].index[slot_index]];
 
     return 0;
 }
 
-int check_full(struct HashMap *hashmap, int bucketindex)
+int check_full(struct HashMap *hashmap, int bucket_index)
 {
     // if it runs without breaking then thatd mean it is full
     // that case i == 7
     int i = 0;
     for (i = 0; i < hashmap->m_slots; i++)
     {
-        if (hashmap->buckettable[bucketindex].hash[i] == 0)
+        if (hashmap->bucket_table[bucket_index].hash[i] == 0)
         {
             break;
         }
@@ -356,14 +356,14 @@ int check_full(struct HashMap *hashmap, int bucketindex)
     return 0;
 }
 
-int check_something(struct HashMap *hashmap, int bucketindex)
+int check_something(struct HashMap *hashmap, int bucket_index)
 {
     int i = 0;
 
     // if you can find a non zero you have found something in the array
     for (i = 0; i < hashmap->m_slots; i++)
     {
-        if (hashmap->buckettable[bucketindex].hash[i] != 0)
+        if (hashmap->bucket_table[bucket_index].hash[i] != 0)
         {
             return 1;
         }

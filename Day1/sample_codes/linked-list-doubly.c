@@ -7,19 +7,19 @@ struct Node
     struct Node *next;
 };
 
-void add_node_front(struct Node **headAddress, int data)
+void add_node_front(struct Node **head_address, int data)
 {
-    if (headAddress == NULL)
+    if (head_address == NULL)
     {
         return;
     }
 
     struct Node *temp = malloc(sizeof(struct Node));
 
-    temp->next = *headAddress;
+    temp->next = *head_address;
     temp->val = data;
 
-    *headAddress = temp;
+    *head_address = temp;
 }
 
 void add_node_back(struct Node **head, int data)

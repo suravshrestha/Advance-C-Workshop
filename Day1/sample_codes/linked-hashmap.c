@@ -96,22 +96,22 @@ int free_linked_list(struct Node *head)
 
 struct HashMap
 {
-    struct Node *hashtable[no_hashslots];
+    struct Node *hash_table[no_hashslots];
 };
 
 int hashmap_init(struct HashMap *hashmap)
 {
     for (int i = 0; i < no_hashslots; i++)
     {
-        hashmap->hashtable[i] = NULL;
+        hashmap->hash_table[i] = NULL;
     }
 
     return 0;
 }
 
-int key_same(struct HashMap *hashmap, int hashindex, char *key)
+int key_same(struct HashMap *hashmap, int hash_index, char *key)
 {
-    struct Node *head = hashmap->hashtable[hashindex];
+    struct Node *head = hashmap->hash_table[hash_index];
 
     while (1)
     {
@@ -141,8 +141,8 @@ int hashmap_add(struct HashMap *hashmap, char *key, int val)
         return 0;
     }
 
-    struct Node *head = hashmap->hashtable[index];
-    add_linked_node(hashmap->hashtable + index, head, hash, key, val);
+    struct Node *head = hashmap->hash_table[index];
+    add_linked_node(hashmap->hash_table + index, head, hash, key, val);
 
     return 0;
 }
@@ -152,7 +152,7 @@ int hashmap_get(struct HashMap *hashmap, char *key, int *val)
     uint32_t hash = adler32(key, (uint64_t)strlen(key) + 1);
     int index = hash & (no_hashslots - 1);
 
-    struct Node *head = hashmap->hashtable[index];
+    struct Node *head = hashmap->hash_table[index];
     while (1)
     {
         if (head == NULL)
@@ -178,7 +178,7 @@ int hashmap_del(struct HashMap *hashmap, char *key)
     uint32_t hash = adler32(key, (uint64_t)strlen(key) + 1);
     int index = hash & (no_hashslots - 1);
 
-    struct Node *head = hashmap->hashtable[index];
+    struct Node *head = hashmap->hash_table[index];
     while (1)
     {
         if (head == NULL)
@@ -199,7 +199,7 @@ int hashmap_del(struct HashMap *hashmap, char *key)
     free(head->key);
     free(head);
 
-    hashmap->hashtable[index] = temp;
+    hashmap->hash_table[index] = temp;
 
     return 0;
 }
@@ -209,8 +209,8 @@ int hashmap_free(struct HashMap *hashmap)
 
     for (int i = 0; i < no_hashslots; i++)
     {
-        hashmap->hashtable[i] ? free_linked_list(hashmap->hashtable[i]) : 0;
-        hashmap->hashtable[i] = NULL;
+        hashmap->hash_table[i] ? free_linked_list(hashmap->hash_table[i]) : 0;
+        hashmap->hash_table[i] = NULL;
     }
     return 0;
 }

@@ -1,18 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct node
+struct Node
 {
     int data;
-    struct node *left;
-    struct node *right;
+    struct Node *left;
+    struct Node *right;
 };
 
-typedef struct node node;
+typedef struct Node Node;
 
-node *create_new_node(int data)
+Node *create_new_node(int data)
 {
-    node *newNode = (node *)malloc(sizeof(node));
+    Node *newNode = (Node *)malloc(sizeof(Node));
 
     newNode->data = data;
     newNode->left = NULL;
@@ -21,12 +21,12 @@ node *create_new_node(int data)
     return newNode;
 }
 
-void add_element_left(node **root, int data)
+void add_element_left(Node **root, int data)
 {
     (*root)->left = create_new_node(data);
 }
 
-void add_element_right(node **root, int data)
+void add_element_right(Node **root, int data)
 {
     (*root)->right = create_new_node(data);
 }
@@ -39,7 +39,7 @@ void print_tabs(int num)
     }
 }
 
-void print_tree(node *root, int level)
+void print_tree(Node *root, int level)
 {
     if (root == NULL)
     {
@@ -58,7 +58,7 @@ void print_tree(node *root, int level)
     print_tree(root->right, level + 1);
 }
 
-void free_tree(node *root)
+void free_tree(Node *root)
 {
     if (root->left)
     {
@@ -75,8 +75,8 @@ void free_tree(node *root)
 
 int main()
 {
-    node *n1 = create_new_node(12);
-    node *n2 = create_new_node(13);
+    Node *n1 = create_new_node(12);
+    Node *n2 = create_new_node(13);
 
     n1->left = n2;
 

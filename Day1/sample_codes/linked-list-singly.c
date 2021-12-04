@@ -54,26 +54,26 @@ void remove_from_list(List *l, int val)
 
 int main()
 {
-    List linkedlist;
+    List linked_list;
 
-    init_list(&linkedlist);
+    init_list(&linked_list);
 
     Node *new_node = malloc(sizeof(Node));
     new_node->data = 15;
     new_node->next = NULL;
-    add_to_list(&linkedlist, new_node);
+    add_to_list(&linked_list, new_node);
 
     new_node = malloc(sizeof(Node));
     new_node->data = 16;
     new_node->next = NULL;
-    add_to_list(&linkedlist, new_node);
+    add_to_list(&linked_list, new_node);
 
-    traverse_list(&linkedlist);
+    traverse_list(&linked_list);
 
-    remove_from_list(&linkedlist, 16);
-    traverse_list(&linkedlist);
+    remove_from_list(&linked_list, 16);
+    traverse_list(&linked_list);
 
-    remove_from_list(&linkedlist, 15);
+    remove_from_list(&linked_list, 15);
 
     return 0;
 }
