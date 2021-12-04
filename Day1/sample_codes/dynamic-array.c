@@ -1,64 +1,85 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-typedef struct {
-    int* data;
+typedef struct
+{
+    int *data;
     int size;
-    int totalElements;
-} Dynamic_Array;
+    int total_elements;
+} DynamicArray;
 
-void initArray(Dynamic_Array* dynamicArray, int size) {
-    dynamicArray->size = size;
-    dynamicArray->totalElements = 0;
-    dynamicArray->data = (int*) malloc(sizeof(int) * dynamicArray->size);
+void init_array(DynamicArray *dynamic_array, int size)
+{
+    dynamic_array->size = size;
+    dynamic_array->total_elements = 0;
+    dynamic_array->data = (int *)malloc(sizeof(int) * dynamic_array->size);
 }
 
-void addElement(int data, Dynamic_Array* dynamicArray) {
-    if (dynamicArray->size == dynamicArray->totalElements) {
-        dynamicArray->size *= 2;
-        dynamicArray->data = (int*) realloc(dynamicArray->data, sizeof(int) * (dynamicArray->size));
+void addElement(int data, DynamicArray *dynamic_array)
+{
+    if (dynamic_array->size == dynamic_array->total_elements)
+    {
+        dynamic_array->size *= 2;
+        dynamic_array->data = (int *)realloc(dynamic_array->data, sizeof(int) * (dynamic_array->size));
     }
-    dynamicArray->data[(dynamicArray->totalElements)++] = data;
+
+    dynamic_array->data[(dynamic_array->total_elements)++] = data;
 }
 
-void resizeArray(Dynamic_Array* dynamicArray) {
-        dynamicArray->size /= 4;
-        dynamicArray->data = (int*) realloc(dynamicArray->data, sizeof(int) * (dynamicArray->size));
+void resize_array(DynamicArray *dynamic_array)
+{
+    dynamic_array->size /= 4;
+    dynamic_array->data = (int *)realloc(dynamic_array->data, sizeof(int) * (dynamic_array->size));
 }
 
-void removeLastElement(Dynamic_Array* dynamicArray) {
-    dynamicArray->data[(dynamicArray->totalElements)--] = 0;
-    if (dynamicArray->totalElements == dynamicArray->size / 4) {
-        resizeArray(dynamicArray);
+void remove_last_element(DynamicArray *dynamic_array)
+{
+    dynamic_array->data[(dynamic_array->total_elements)--] = 0;
+
+    if (dynamic_array->total_elements == dynamic_array->size / 4)
+    {
+        resize_array(dynamic_array);
     }
 }
 
-void freeArray(Dynamic_Array* dynamicArray) {
-    free(dynamicArray->data);
-    dynamicArray->data = NULL;
-    dynamicArray->size = dynamicArray->totalElements = 0;
+void free_array(DynamicArray *dynamic_array)
+{
+    free(dynamic_array->data);
+
+    dynamic_array->data = NULL;
+    dynamic_array->size = dynamic_array->total_elements = 0;
 }
 
+int main()
+{
+    DynamicArray dynamic_array;
+    init_array(&dynamic_array, 5);
 
-int main() {
-    Dynamic_Array dynamicArray;
-    initArray(&dynamicArray, 5);
+    for (int i = 0; i < 12; i++)
+    {
+        addElement(i, &dynamic_array);
+    }
 
-    for (int i = 0; i < 12; i++) {
-        addElement(i, &dynamicArray);
+    for (int i = 0; i < dynamic_array.total_elements; i++)
+    {
+        printf("%d ", dynamic_array.data[i]);
     }
-    for (int i = 0; i < dynamicArray.totalElements; i++) {
-        printf("%d ", dynamicArray.data[i]);
-    }
+
     printf("\n");
-    for (int i = 0; i < 10; i++) {
-        removeLastElement(&dynamicArray);
+
+    for (int i = 0; i < 10; i++)
+    {
+        remove_last_element(&dynamic_array);
     }
-    printf("%d %d\n", dynamicArray.size, dynamicArray.totalElements);
-    for (int i = 0; i < dynamicArray.totalElements; i++) {
-        printf("%d ", dynamicArray.data[i]);
+
+    printf("%d %d\n", dynamic_array.size, dynamic_array.total_elements);
+
+    for (int i = 0; i < dynamic_array.total_elements; i++)
+    {
+        printf("%d ", dynamic_array.data[i]);
     }
-    free(dynamicArray.data);
+
+    free(dynamic_array.data);
+
     return 0;
 }

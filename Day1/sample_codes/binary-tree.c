@@ -1,66 +1,91 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct node {
+struct node
+{
     int data;
-    struct node* left;
-    struct node* right;      
+    struct node *left;
+    struct node *right;
 };
 
 typedef struct node node;
 
-node* createNewNode(int data) {
-    node* newNode = (node*) malloc(sizeof(node));
+node *create_new_node(int data)
+{
+    node *newNode = (node *)malloc(sizeof(node));
+
     newNode->data = data;
     newNode->left = NULL;
     newNode->right = NULL;
+
     return newNode;
 }
 
-void addElementLeft(node** root, int data) {
-    (*root)->left = createNewNode(data); 
+void add_element_left(node **root, int data)
+{
+    (*root)->left = create_new_node(data);
 }
 
-void addElementRight(node** root, int data) {
-    (*root)->right = createNewNode(data); 
+void add_element_right(node **root, int data)
+{
+    (*root)->right = create_new_node(data);
 }
 
-void printTabs(int num) {
-    for (int i = 0; i < num; i++) {
+void print_tabs(int num)
+{
+    for (int i = 0; i < num; i++)
+    {
         printf("\t");
     }
 }
 
-void printTree(node* root, int level) {
-    if (root == NULL) return;
-    printTabs(level);
+void print_tree(node *root, int level)
+{
+    if (root == NULL)
+    {
+        return;
+    }
+
+    print_tabs(level);
     printf("data = %d\n", root->data);
-    printTabs(level);
+
+    print_tabs(level);
     printf("left\n");
-    printTree(root->left, level+1);
-    printTabs(level);
+    print_tree(root->left, level + 1);
+
+    print_tabs(level);
     printf("right\n");
-    printTree(root->right, level+1);
+    print_tree(root->right, level + 1);
 }
 
-void freeTree (node* root) {
-	if (root->left) {
-		freeTree(root->left);
-	}
-	if (root->right) {
-		freeTree(root->right);
-	}
-	free(root);
+void free_tree(node *root)
+{
+    if (root->left)
+    {
+        free_tree(root->left);
+    }
+
+    if (root->right)
+    {
+        free_tree(root->right);
+    }
+
+    free(root);
 }
 
-int main() {
-    node* n1 = createNewNode(12);
-    node* n2 = createNewNode(13);
+int main()
+{
+    node *n1 = create_new_node(12);
+    node *n2 = create_new_node(13);
+
     n1->left = n2;
-    addElementRight(&n1, 15);
-    addElementLeft(&n2, 21);
-    addElementRight(&n2, 54);
-    printTree(n1, 0);
-    freeTree(n1);
+
+    add_element_right(&n1, 15);
+    add_element_left(&n2, 21);
+    add_element_right(&n2, 54);
+
+    print_tree(n1, 0);
+    free_tree(n1);
+
     return 0;
 }
