@@ -37,7 +37,7 @@ struct HashMap
     struct Bucket *bucket_table; // pointer to bucket array
 
     // no globals because we modify them when resizing
-    // imp to have a copy of buck n slot no when the hashmap was init-ed
+    // imp to have a copy of bucket and slot no when the hashmap was init-ed
     int m_buckets;
     int m_slots;
     int index_keyval; // 0 to no_buckets*no_slots, basically the index of keys, values and sizes_of_keys
@@ -47,7 +47,7 @@ struct HashMap
     int *values;        // pointer to values array, default = 0
 };
 
-int hasmap_init(struct HashMap *hashmap);
+int hashmap_init(struct HashMap *hashmap);
 int hashmap_deinit(struct HashMap *hashmap);
 int hashmap_get(struct HashMap *hashmap, char *k, int *v);
 int hashmap_resize(struct HashMap *hashmap);
@@ -56,7 +56,7 @@ int hashmap_del(struct HashMap *hashmap, char *k);
 int check_full(struct HashMap *hashmap, int bucket_index);
 int check_something(struct HashMap *hashmap, int bucket_index);
 
-int hasmap_init(struct HashMap *hashmap)
+int hashmap_init(struct HashMap *hashmap)
 {
     hashmap->m_buckets = no_buckets;
     hashmap->m_slots = no_slots;
@@ -261,13 +261,12 @@ int hashmap_del(struct HashMap *hashmap, char *k)
 int hashmap_resize(struct HashMap *hashmap)
 {
     // IMPORTANT
-    // the code can resize itself
-    // you dont have to call this func
+    // the code can resize itself, we dont have to call this func
 
     no_buckets *= 2;
 
     struct HashMap hTemp;
-    hasmap_init(&hTemp);
+    hashmap_init(&hTemp);
 
     for (int i = 0; i < hashmap->index_keyval; i++)
     {
@@ -295,7 +294,7 @@ int hashmap_get(struct HashMap *hashmap, char *k, int *v)
     int bucket_index = pos / hashmap->m_slots;
     int slot_index = pos & (hashmap->m_slots - 1);
 
-    // check if atleast Something is in bucket
+    // check if at least something is in bucket
     if (!check_something(hashmap, bucket_index))
     {
         memset(v, 0, sizeof(int));
@@ -308,7 +307,8 @@ int hashmap_get(struct HashMap *hashmap, char *k, int *v)
     {
         if (hashmap->bucket_table[bucket_index].hash[slot_index] == hash)
         {
-            // hashes may match but our hash function isn't sha256, multiple inputs can have the same hash, sha256 is believed to be immune to this (and many others may be aswell) but its kinda hard to implement
+            // hashes may match but our hash function isn't sha256, multiple inputs can have the same hash,
+            // sha256 is believed to be immune to this (and many others may be as well) but its kinda hard to implement,
             // so also check the actual keys
             if (memcmp(hashmap->keys[hashmap->bucket_table[bucket_index].index[slot_index]], k, size) == 0)
             {
@@ -324,7 +324,7 @@ int hashmap_get(struct HashMap *hashmap, char *k, int *v)
 
         if (slot_index == tmp)
         {
-            // key does not exists, we checked all slot indexes
+            // key does not exist, we checked all slot indexes
             return -1;
         }
     }
@@ -337,8 +337,7 @@ int hashmap_get(struct HashMap *hashmap, char *k, int *v)
 
 int check_full(struct HashMap *hashmap, int bucket_index)
 {
-    // if it runs without breaking then thatd mean it is full
-    // that case i == 7
+    // if it runs without breaking then that mean it is full that case i == 7
     int i = 0;
     for (i = 0; i < hashmap->m_slots; i++)
     {
@@ -360,7 +359,7 @@ int check_something(struct HashMap *hashmap, int bucket_index)
 {
     int i = 0;
 
-    // if you can find a non zero you have found something in the array
+    // if we can find a non zero we have found something in the array
     for (i = 0; i < hashmap->m_slots; i++)
     {
         if (hashmap->bucket_table[bucket_index].hash[i] != 0)
@@ -377,7 +376,7 @@ int main()
     printf("Hello Warudo!\n");
 
     struct HashMap hashmap;
-    hasmap_init(&hashmap);
+    hashmap_init(&hashmap);
 
     hashmap_add(&hashmap, "Wrry", 15);
     hashmap_add(&hashmap, "Hehhh", 16);
